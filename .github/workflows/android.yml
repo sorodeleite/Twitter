@@ -33,6 +33,12 @@ jobs:
           flutter pub get
           rm -f test/widget_test.dart
 
+      - name: Build Apple emoji font
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install fonttools brotli pillow
+          python scripts/build-emoji-font.py
+
       - name: Analyze Dart source
         run: flutter analyze --no-fatal-infos --no-fatal-warnings
 
