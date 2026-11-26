@@ -110,7 +110,7 @@ class _MainShellState extends State<MainShell> {
   }
   @override
   void dispose() { searchController.dispose(); super.dispose(); }
-  Future<void> savePosts() async => widget.prefs.setString('timeline_posts', jsonEncode(posts.map((p) => p.toJson()).toList()));
+  Future<void> savePosts() async { await widget.prefs.setString('timeline_posts', jsonEncode(posts.map((p) => p.toJson()).toList())); }
   void changed() { if (mounted) setState(() {}); savePosts(); }
   void addPost(String text, {String? imagePath}) {
     if (text.trim().isEmpty && imagePath == null) return;
