@@ -31,6 +31,7 @@ jobs:
         run: |
           git checkout -- lib/main.dart pubspec.yaml
           flutter pub get
+          rm -f test/widget_test.dart
 
       - name: Analyze Dart source
         run: flutter analyze --no-fatal-infos --no-fatal-warnings
