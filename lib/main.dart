@@ -78,7 +78,24 @@ class Post {
   int likes, reposts, replies;
   bool liked = false, reposted = false;
   Map<String, dynamic> toJson() => {'name': name, 'handle': handle, 'avatar': avatar, 'text': text, 'time': time, 'image': image, 'likes': likes, 'reposts': reposts, 'replies': replies, 'isBot': isBot, 'verified': verified, 'liked': liked, 'reposted': reposted};
-  factory Post.fromJson(Map<String, dynamic> j) => Post(name: j['name'], handle: j['handle'], avatar: j['avatar'], text: j['text'], time: j['time'], image: j['image'], likes: j['likes'] ?? 0, reposts: j['reposts'] ?? 0, replies: j['replies'] ?? 0, isBot: j['isBot'] ?? false, verified: j['verified'] ?? false)..liked = j['liked'] ?? false..reposted = j['reposted'] ?? false;
+  factory Post.fromJson(Map<String, dynamic> j) {
+    final post = Post(
+      name: j['name'] as String,
+      handle: j['handle'] as String,
+      avatar: j['avatar'] as String? ?? '♡',
+      text: j['text'] as String,
+      time: j['time'] as String? ?? 'now',
+      image: j['image'] as String?,
+      likes: j['likes'] as int? ?? 0,
+      reposts: j['reposts'] as int? ?? 0,
+      replies: j['replies'] as int? ?? 0,
+      isBot: j['isBot'] as bool? ?? false,
+      verified: j['verified'] as bool? ?? false,
+    );
+    post.liked = j['liked'] as bool? ?? false;
+    post.reposted = j['reposted'] as bool? ?? false;
+    return post;
+  }
 }
 
 class MainShell extends StatefulWidget {
@@ -152,7 +169,7 @@ class _MainShellState extends State<MainShell> {
       appBar: AppBar(
         leading: Padding(padding: const EdgeInsets.all(12),
           child: CircleAvatar(backgroundColor: widget.accent.withValues(alpha: .13),
-            child: Icon(Icons.flutter_dash_rounded, color: widget.accent))),
+            child: Text('𝕏', style: TextStyle(color: widget.accent, fontSize: 18, fontWeight: FontWeight.w800)))),
         title: Text(title, style: const TextStyle(fontWeight: FontWeight.w800)),
         actions: [IconButton(tooltip: 'Appearance', icon: const Icon(Icons.palette_outlined),
           onPressed: openAppearance), const SizedBox(width: 4)],
