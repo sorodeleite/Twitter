@@ -63,7 +63,7 @@ class _TwitterAppState extends State<TwitterApp> {
   Widget build(BuildContext context) => MaterialApp(
     debugShowCheckedModeBanner: false, title: 'Twitter',
     theme: makeTheme(Brightness.light), darkTheme: makeTheme(Brightness.dark), themeMode: themeMode,
-    home: MainShell(accent: accent, palette: palette, onAccentChanged: setAccent,
+    home: MainShell(prefs: widget.prefs, accent: accent, palette: palette, onAccentChanged: setAccent,
       themeMode: themeMode, onThemeChanged: setThemeMode),
   );
 }
@@ -99,8 +99,9 @@ class Post {
 }
 
 class MainShell extends StatefulWidget {
-  const MainShell({super.key, required this.accent, required this.palette,
+  const MainShell({super.key, required this.prefs, required this.accent, required this.palette,
     required this.onAccentChanged, required this.themeMode, required this.onThemeChanged});
+  final SharedPreferences prefs;
   final Color accent;
   final List<Color> palette;
   final ValueChanged<Color> onAccentChanged;
