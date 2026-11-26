@@ -119,16 +119,16 @@ class _MainShellState extends State<MainShell> {
     if (saved != null) {
       try {
         final decoded = jsonDecode(saved) as List<dynamic>;
-        if (decoded.isNotEmpty) posts.addAll(decoded.map((item) => Post.fromJson(item as Map<String, dynamic>)));
+        if (decoded.isNotEmpty) { posts.clear(); posts.addAll(decoded.map((item) => Post.fromJson(item as Map<String, dynamic>))); }
       } catch (_) {}
     }
   }
 
-  Future<void> savePosts() async => widget.prefs.setString('timeline_posts', jsonEncode(posts.map((post) => post.toJson()).toList()));
+  Future<void> savePosts() async { await widget.prefs.setString('timeline_posts', jsonEncode(posts.map((post) => post.toJson()).toList())); }
   String get title => ['Home', 'Explore', 'Notifications', 'Messages', 'Profile'][tab];
 
   void addPost(String text, {String? imagePath}) {
-    if (text.trim().isEmpty) return;
+    if (text.trim().isEmpty && imagePath == null) return;
     setState(() {
       posts.insert(0, Post(name: 'you', handle: '@youraccount', avatar: '♡',
         text: text.trim(), time: 'now', image: imagePath));
