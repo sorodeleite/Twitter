@@ -324,8 +324,8 @@ class PostCard extends StatelessWidget {
               const Icon(Icons.more_horiz, color: Colors.grey),
             ]),
             const SizedBox(height: 6), Text(post.text, style: const TextStyle(fontSize: 14.5, height: 1.4)),
-            if (post.image != null) ...[const SizedBox(height: 10),
-              ClipRRect(borderRadius: BorderRadius.circular(14), child: Image.network(post.image!, fit: BoxFit.cover))],
+            if (post.image != null && File(post.image!).existsSync()) ...[const SizedBox(height: 10),
+              ClipRRect(borderRadius: BorderRadius.circular(14), child: Image.file(File(post.image!), fit: BoxFit.cover))],
             const SizedBox(height: 12),
             Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
               _Action(icon: Icons.chat_bubble_outline, count: post.replies.toString(), onTap: () {}),
