@@ -1,3 +1,5 @@
+import 'dart:convert';
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:image_picker/image_picker.dart';
@@ -75,6 +77,8 @@ class Post {
   final String? image;
   int likes, reposts, replies;
   bool liked = false, reposted = false;
+  Map<String, dynamic> toJson() => {'name': name, 'handle': handle, 'avatar': avatar, 'text': text, 'time': time, 'image': image, 'likes': likes, 'reposts': reposts, 'replies': replies, 'isBot': isBot, 'verified': verified, 'liked': liked, 'reposted': reposted};
+  factory Post.fromJson(Map<String, dynamic> j) => Post(name: j['name'], handle: j['handle'], avatar: j['avatar'], text: j['text'], time: j['time'], image: j['image'], likes: j['likes'] ?? 0, reposts: j['reposts'] ?? 0, replies: j['replies'] ?? 0, isBot: j['isBot'] ?? false, verified: j['verified'] ?? false)..liked = j['liked'] ?? false..reposted = j['reposted'] ?? false;
 }
 
 class MainShell extends StatefulWidget {
@@ -106,21 +110,37 @@ class _MainShellState extends State<MainShell> {
       time: '1 h', isBot: true, likes: 61),
   ];
   final TextEditingController searchController = TextEditingController();
+  final ImagePicker imagePicker = ImagePicker();
+
+  @override
+  void initState() {
+    super.initState();
+    final saved = widget.prefs.getString('timeline_posts');
+    if (saved != null) {
+      try {
+        final decoded = jsonDecode(saved) as List<dynamic>;
+        if (decoded.isNotEmpty) posts.addAll(decoded.map((item) => Post.fromJson(item as Map<String, dynamic>)));
+      } catch (_) {}
+    }
+  }
+
+  Future<void> savePosts() async => widget.prefs.setString('timeline_posts', jsonEncode(posts.map((post) => post.toJson()).toList()));
   String get title => ['Home', 'Explore', 'Notifications', 'Messages', 'Profile'][tab];
 
-  void addPost(String text) {
+  void addPost(String text, {String? imagePath}) {
     if (text.trim().isEmpty) return;
     setState(() {
       posts.insert(0, Post(name: 'you', handle: '@youraccount', avatar: '♡',
-        text: text.trim(), time: 'now'));
+        text: text.trim(), time: 'now', image: imagePath));
       tab = 0;
     });
+    savePosts();
   }
 
   @override
   Widget build(BuildContext context) {
     final pages = [
-      HomePage(posts: posts, onChanged: () => setState(() {})),
+      HomePage(posts: posts, onChanged: () { setState(() {}); savePosts(); }),
       ExplorePage(controller: searchController),
       const SimplePage(icon: Icons.notifications_none_rounded, title: 'Notifications',
         subtitle: 'You’re all caught up. New activity will appear here.'),
