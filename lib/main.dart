@@ -175,23 +175,61 @@ class _MainShellState extends State<MainShell> {
 
   void compose() {
     final controller = TextEditingController();
-    showModalBottomSheet(context: context, isScrollControlled: true, useSafeArea: true,
-      builder: (sheetContext) => Padding(
-        padding: EdgeInsets.fromLTRB(20, 18, 20, MediaQuery.of(sheetContext).viewInsets.bottom + 20),
-        child: Column(mainAxisSize: MainAxisSize.min, children: [
-          Row(children: [const Text('New post', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-            const Spacer(), TextButton(onPressed: () { addPost(controller.text); Navigator.pop(sheetContext); },
-              child: const Text('Post'))]),
-          TextField(controller: controller, autofocus: true, maxLines: 5, maxLength: 280,
-            decoration: const InputDecoration(hintText: 'What’s happening? ♡', filled: false)),
-          Row(children: [
-            IconButton(onPressed: () async { await ImagePicker().pickImage(source: ImageSource.gallery); },
-              icon: const Icon(Icons.image_outlined), tooltip: 'Add photo'),
-            IconButton(onPressed: () {}, icon: const Icon(Icons.gif_box_outlined), tooltip: 'Add GIF'),
-            const Spacer(), const Text('Your timeline, your little world', style: TextStyle(fontSize: 11, color: Colors.grey)),
+    XFile? selectedImage;
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      useSafeArea: true,
+      builder: (sheetContext) => StatefulBuilder(
+        builder: (context, refreshSheet) => Padding(
+          padding: EdgeInsets.fromLTRB(20, 16, 20, MediaQuery.of(sheetContext).viewInsets.bottom + 20),
+          child: Column(mainAxisSize: MainAxisSize.min, children: [
+            Row(children: [
+              TextButton(onPressed: () => Navigator.pop(sheetContext), child: const Text('Cancel')),
+              const Spacer(),
+              const Text('New post', style: TextStyle(fontSize: 17, fontWeight: FontWeight.w800)),
+              const Spacer(),
+              FilledButton(onPressed: () {
+                addPost(controller.text, imagePath: selectedImage?.path);
+                Navigator.pop(sheetContext);
+              }, child: const Text('Post')),
+            ]),
+            const SizedBox(height: 12),
+            Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
+              const CircleAvatar(child: Text('♡')),
+              const SizedBox(width: 12),
+              Expanded(child: TextField(
+                controller: controller, autofocus: true, minLines: 3, maxLines: 6, maxLength: 280,
+                decoration: const InputDecoration(hintText: 'What’s happening? ♡', filled: false,
+                  border: InputBorder.none, enabledBorder: InputBorder.none,
+                  focusedBorder: InputBorder.none, counterText: ''),
+              )),
+            ]),
+            if (selectedImage != null)
+              Padding(
+                padding: const EdgeInsets.only(left: 48, bottom: 10),
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(14),
+                  child: Image.file(File(selectedImage!.path), height: 165, width: double.infinity, fit: BoxFit.cover),
+                ),
+              ),
+            const Divider(),
+            Row(children: [
+              IconButton(tooltip: 'Choose photo', onPressed: () async {
+                final file = await imagePicker.pickImage(source: ImageSource.gallery, imageQuality: 88);
+                if (file != null) refreshSheet(() => selectedImage = file);
+              }, icon: const Icon(Icons.image_outlined)),
+              IconButton(tooltip: 'Take photo', onPressed: () async {
+                final file = await imagePicker.pickImage(source: ImageSource.camera, imageQuality: 88);
+                if (file != null) refreshSheet(() => selectedImage = file);
+              }, icon: const Icon(Icons.camera_alt_outlined)),
+              const Spacer(),
+              const Text('Everyone can reply', style: TextStyle(fontSize: 12, color: Colors.grey)),
+            ]),
           ]),
-        ]),
-      ));
+        ),
+      ),
+    ).whenComplete(controller.dispose);
   }
 
   void openAppearance() {
