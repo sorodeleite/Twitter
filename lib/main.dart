@@ -175,6 +175,7 @@ class _MainShellState extends State<MainShell> {
   }
 
   void openAppearance() {
+    final colorController = TextEditingController(text: '#${widget.accent.value.toRadixString(16).substring(2).toUpperCase()}');
     showModalBottomSheet(context: context, isScrollControlled: true, useSafeArea: true,
       builder: (sheetContext) => StatefulBuilder(builder: (context, refresh) {
         final isDark = widget.themeMode == ThemeMode.dark;
@@ -206,7 +207,17 @@ class _MainShellState extends State<MainShell> {
                     ? const Icon(Icons.check, color: Colors.white, size: 19) : null,
                 ))).toList()),
             const SizedBox(height: 18),
-            const Text('Custom color picker will be added in the next polish pass.'),
+            TextField(controller: colorController, textCapitalization: TextCapitalization.characters,
+              decoration: InputDecoration(labelText: 'Custom HEX color', hintText: '#F4A7C7',
+                suffixIcon: IconButton(icon: const Icon(Icons.check), onPressed: () {
+                  final hex = colorController.text.trim().replaceFirst('#', '');
+                  final normalized = hex.length == 6 ? 'FF' + hex : hex;
+                  final value = int.tryParse(normalized, radix: 16);
+                  if (value != null && normalized.length == 8) {
+                    widget.onAccentChanged(Color(value));
+                    refresh(() {});
+                  }
+                }))),
           ]));
       }));
   }
