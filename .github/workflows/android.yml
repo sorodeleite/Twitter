@@ -8,12 +8,12 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: read
+  contents: write
 
 jobs:
   build:
     runs-on: ubuntu-latest
-    timeout-minutes: 30
+    timeout-minutes: 40
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -38,10 +38,23 @@ jobs:
       - name: Build release APK
         run: flutter build apk --release
 
-      - name: Upload APK
+      - name: Upload APK artifact
         uses: actions/upload-artifact@v4
         with:
           name: twitter-android
           path: build/app/outputs/flutter-apk/app-release.apk
           if-no-files-found: error
           retention-days: 14
+
+      - name: Publish GitHub Release with APK
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: android-build-${{ github.run_number }}
+          name: Twitter Android build #${{ github.run_number }}
+          body: |
+            Build automático do aplicativo Twitter para Android.
+
+            Baixe o arquivo app-release.apk em Assets abaixo e instale no seu dispositivo.
+          prerelease: true
+          files: build/app/outputs/flutter-apk/app-release.apk
