@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -232,6 +233,19 @@ class _MainShellState extends State<MainShell> {
         Wrap(spacing: 13, runSpacing: 13, children: widget.palette.map((c) => GestureDetector(onTap: () { widget.onAccentChanged(c); update(() {}); }, child: CircleAvatar(radius: 18, backgroundColor: c, child: widget.accent.toARGB32() == c.toARGB32() ? const Icon(Icons.check, color: Colors.white, size: 18) : null))).toList()),
         const SizedBox(height: 20), const Text('EMOJIS', style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold, letterSpacing: 1)),
         SwitchListTile(contentPadding: EdgeInsets.zero, title: const Text('Emojis no estilo iPhone'), subtitle: const Text('Usar a fonte colorida Apple em vez dos emojis do aparelho.'), value: widget.appleEmoji, onChanged: (v) { widget.onEmojiChanged(v); update(() {}); }),
+        const SizedBox(height: 20),
+        const Text('APLICATIVO', style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold, letterSpacing: 1)),
+        ListTile(
+          contentPadding: EdgeInsets.zero,
+          leading: const Icon(Icons.system_update_alt_rounded),
+          title: const Text('Atualizações'),
+          subtitle: const Text('Ver versões novas e baixar o APK mais recente.'),
+          trailing: const Icon(Icons.open_in_new_rounded, size: 18),
+          onTap: () {
+            Navigator.pop(context);
+            launchUrl(Uri.parse('https://github.com/sorodeleite/Twitter/releases'), mode: LaunchMode.externalApplication);
+          },
+        ),
       ]),
     )));
   }
