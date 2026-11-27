@@ -19,6 +19,7 @@ import 'services/illit_service.dart';
 import 'services/updater_service.dart';
 import 'widgets/avatar_widget.dart';
 import 'widgets/post_card.dart';
+import 'widgets/x_logo.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -966,8 +967,7 @@ class _MainShellState extends State<MainShell> with SingleTickerProviderStateMix
         titleSpacing: 0,
         centerTitle: tab == 0,
         title: tab == 0
-            ? const Text('𝕏',
-                style: TextStyle(fontSize: 26, fontWeight: FontWeight.w900, height: 1))
+            ? const XLogo(size: 24)
             : Text(_tabs[tab]),
         actions: [
           if (refreshingIllit)

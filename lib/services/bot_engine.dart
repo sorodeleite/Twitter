@@ -89,7 +89,7 @@ class BotEngine {
           bio: 'melhor amiga, fã de ILLIT e especialista em mandar print às 3h da manhã 🥺♡',
           location: 'aqui do ladinho',
           joinedDate: 'outubro de 2026',
-          avatarEmoji: '୨ৎ',
+          avatarEmoji: '🎀',
           avatarPath: 'asset:assets/images/HYGeDzGbYAArkl0.jpg',
           verified: false,
           isFriend: true,

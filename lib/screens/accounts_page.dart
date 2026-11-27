@@ -218,7 +218,7 @@ class _AccountsPageState extends State<AccountsPage> {
     final locCtrl = TextEditingController(text: existing?.location ?? '');
     final siteCtrl = TextEditingController(text: existing?.website ?? '');
     final joinedCtrl = TextEditingController(text: existing?.joinedDate ?? 'novembro de 2026');
-    final emojiCtrl = TextEditingController(text: existing?.avatarEmoji ?? '୨ৎ');
+    final emojiCtrl = TextEditingController(text: existing?.avatarEmoji ?? '🎀');
     final favEmojisCtrl = TextEditingController(text: existing?.favoriteEmojis ?? '♡ ✨ kkkk');
     final templatesCtrl = TextEditingController(text: (existing?.replyTemplates ?? []).join('\n'));
     final samplesCtrl = TextEditingController(text: (existing?.examplePosts ?? []).join('\n'));
