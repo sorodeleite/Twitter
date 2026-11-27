@@ -60,7 +60,7 @@ class _ProfilePageState extends State<ProfilePage> with SingleTickerProviderStat
         .toList();
     final mediaPosts =
         userPosts.where((p) => p.mediaPath != null && p.mediaPath!.isNotEmpty).toList();
-    final likedPosts = widget.allPosts.where((p) => p.liked).toList();
+    final likedPosts = acc.isMe ? widget.allPosts.where((p) => p.liked).toList() : <Post>[];
     final repliedPosts = widget.allPosts
         .where((p) => p.replies.any((r) => r.handle == acc.handle))
         .toList();

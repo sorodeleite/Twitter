@@ -14,6 +14,7 @@ from PIL import Image
 
 ROOT = Path(__file__).resolve().parent.parent
 MANIFEST = ROOT / "android" / "app" / "src" / "main" / "AndroidManifest.xml"
+ROOT_BUILD = ROOT / "android" / "build.gradle.kts"
 
 
 def patch_manifest() -> None:
@@ -54,11 +55,37 @@ def build_icons() -> None:
     print("ícones do launcher gerados")
 
 
+def disable_lint() -> None:
+    """O lint do AGP quebra ao analisar fontes Java de alguns plugins.
+
+    Sem isso o build de release falha em image_picker_android com um
+    NoSuchMethodError dentro do próprio lint. Desligar o lint não muda o APK.
+    """
+    text = ROOT_BUILD.read_text(encoding="utf-8")
+    if "lintVital" in text or "startsWith(\"lint\")" in text:
+        return
+    block = """
+
+// Lint do AGP desligado: ele quebra ao analisar fontes Java de plugins
+// (image_picker_android). O Flutter já roda `flutter analyze` antes do build.
+subprojects {
+    tasks.configureEach {
+        if (it.name.startsWith("lint")) {
+            it.enabled = false
+        }
+    }
+}
+"""
+    ROOT_BUILD.write_text(text + block, encoding="utf-8")
+    print("lint do Gradle desligado")
+
+
 def main() -> None:
     if not MANIFEST.exists():
         raise SystemExit(f"manifest não encontrado: {MANIFEST}")
     patch_manifest()
     build_icons()
+    disable_lint()
 
 
 if __name__ == "__main__":
