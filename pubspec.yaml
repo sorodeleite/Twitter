@@ -1,7 +1,7 @@
-name: twitter
+﻿name: twitter
 description: A personal, customizable social timeline with automated fan accounts.
 publish_to: 'none'
-version: 1.1.0+2
+version: 2.0.0+3
 
 environment:
   sdk: '>=3.3.0 <4.0.0'
@@ -13,6 +13,8 @@ dependencies:
   shared_preferences: ^2.3.2
   image_picker: ^1.1.2
   url_launcher: ^6.3.1
+  path_provider: ^2.1.4
+  open_filex: ^5.0.0
 
 dev_dependencies:
   flutter_test:
@@ -21,7 +23,12 @@ dev_dependencies:
 
 flutter:
   uses-material-design: true
+  assets:
+    - assets/images/
   fonts:
     - family: Pooftie Apple Emoji
       fonts:
         - asset: assets/emoji/apple-emoji.ttf
+
+
+

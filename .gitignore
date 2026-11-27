@@ -1,0 +1,25 @@
+# Flutter / Dart
+.dart_tool/
+.packages
+.flutter-plugins
+.flutter-plugins-dependencies
+build/
+*.iml
+.idea/
+.vscode/
+
+# Android gerado no CI pelo `flutter create`
+android/
+ios/
+linux/
+macos/
+windows/
+web/
+
+# Assets gerados
+assets/emoji/apple-emoji.ttf
+
+# Temporários
+.dsh-tmp/
+*.log
+.DS_Store

@@ -10,13 +10,23 @@ on:
 permissions:
   contents: write
 
+concurrency:
+  group: android-build-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   build:
     runs-on: ubuntu-latest
-    timeout-minutes: 40
+    timeout-minutes: 45
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+
+      - name: Set up Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
 
       - name: Install Flutter
         uses: subosito/flutter-action@v2
@@ -29,14 +39,19 @@ jobs:
 
       - name: Restore tracked app sources
         run: |
-          git checkout -- lib/main.dart pubspec.yaml
+          git checkout -- lib/ pubspec.yaml
           rm -f test/widget_test.dart
 
-      - name: Build Apple emoji font
+      - name: Install build helpers
         run: |
           python -m pip install --upgrade pip
           python -m pip install fonttools brotli pillow
-          python scripts/build-emoji-font.py
+
+      - name: Build Apple emoji font
+        run: python scripts/build-emoji-font.py
+
+      - name: Configure Android manifest and icon
+        run: python scripts/configure_android.py
 
       - name: Resolve Flutter packages
         run: flutter pub get
@@ -45,13 +60,20 @@ jobs:
         run: flutter analyze --no-fatal-infos --no-fatal-warnings
 
       - name: Build release APK
-        run: flutter build apk --release
+        run: >
+          flutter build apk --release
+          --build-name=2.0.0
+          --build-number=${{ github.run_number }}
+          --dart-define=BUILD_NUMBER=${{ github.run_number }}
+
+      - name: Sign APK with the project key
+        run: python scripts/sign_apk.py
 
       - name: Upload APK artifact
         uses: actions/upload-artifact@v4
         with:
           name: twitter-android
-          path: build/app/outputs/flutter-apk/app-release.apk
+          path: build/app/outputs/flutter-apk/app-release-signed.apk
           if-no-files-found: error
           retention-days: 14
 
@@ -61,9 +83,12 @@ jobs:
         with:
           tag_name: android-build-${{ github.run_number }}
           name: Twitter Android build #${{ github.run_number }}
+          prerelease: false
+          make_latest: true
           body: |
-            Build automático do aplicativo Twitter para Android.
+            Build automático do Twitter (vida revisada ♡).
 
-            Baixe o arquivo app-release.apk em Assets abaixo e instale no seu dispositivo.
-          prerelease: true
-          files: build/app/outputs/flutter-apk/app-release.apk
+            **Como atualizar:** abra o app e toque no ⋮ → "Atualizar aplicativo". Ele procura este release, baixa o APK e abre o instalador. Também dá para baixar o `app-release.apk` aqui nos Assets.
+
+            ⚠️ Esta é a primeira build assinada com a chave fixa do projeto. Se você instalou uma versão anterior, desinstale uma única vez antes de instalar esta. Depois disso, todas as próximas atualizam por cima sem perder nada.
+          files: build/app/outputs/flutter-apk/app-release-signed.apk
