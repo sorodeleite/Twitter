@@ -70,8 +70,8 @@ def disable_lint() -> None:
 // (image_picker_android). O Flutter já roda `flutter analyze` antes do build.
 subprojects {
     tasks.configureEach {
-        if (it.name.startsWith("lint")) {
-            it.enabled = false
+        if (name.startsWith("lint")) {
+            enabled = false
         }
     }
 }
