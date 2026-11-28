@@ -32,7 +32,12 @@ class PostCard extends StatelessWidget {
     return Column(
       children: [
         InkWell(
-          onTap: onOpenThread,
+          onTap: post.accountId.startsWith('external-') && post.linkUrl != null
+              ? () => launchUrl(
+                    Uri.parse(post.linkUrl!),
+                    mode: LaunchMode.externalApplication,
+                  )
+              : onOpenThread,
           child: Padding(
             padding: const EdgeInsets.fromLTRB(14, 10, 8, 4),
             child: Column(
@@ -216,8 +221,15 @@ class PostCard extends StatelessWidget {
                                   icon: Icons.chat_bubble_outline_rounded,
                                   count: post.replies.length,
                                   color: secondary,
-                                  onTap: onOpenThread,
-                                  tooltip: 'Responder',
+                                  onTap: post.accountId.startsWith('external-') && post.linkUrl != null
+                                      ? () => launchUrl(
+                                            Uri.parse(post.linkUrl!),
+                                            mode: LaunchMode.externalApplication,
+                                          )
+                                      : onOpenThread,
+                                  tooltip: post.accountId.startsWith('external-')
+                                      ? 'Ver conversa no X'
+                                      : 'Responder',
                                 ),
                                 _TweetAction(
                                   icon: Icons.repeat_rounded,
