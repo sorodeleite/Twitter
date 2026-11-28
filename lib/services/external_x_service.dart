@@ -107,7 +107,7 @@ class ExternalXService {
   static String? _attribute(String block, String tag, String attribute) {
     final element = RegExp('<$tag\\b[^>]*>', caseSensitive: false).firstMatch(block)?.group(0);
     if (element == null) return null;
-    return RegExp('$attribute=["\\']([^"\\']+)["\\']', caseSensitive: false)
+    return RegExp("$attribute=[\"']([^\"']+)[\"']", caseSensitive: false)
         .firstMatch(element)
         ?.group(1);
   }
