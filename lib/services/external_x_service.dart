@@ -143,7 +143,9 @@ class ExternalXService {
       final item = match.group(1) ?? '';
       final link = _decode(_tag(item, 'link') ?? '').trim();
       final guid = _decode(_tag(item, 'guid') ?? '').trim();
-      final description = _plainText(_tag(item, 'description') ?? '');
+      final description = _plainText(
+        _tag(item, 'description') ?? _tag(item, 'content:encoded') ?? '',
+      );
       final title = _plainText(_tag(item, 'title') ?? '');
       final text = description.isNotEmpty ? description : title;
       if (text.isEmpty) continue;
@@ -151,12 +153,14 @@ class ExternalXService {
       final enclosure = _attribute(item, 'enclosure', 'url');
       final mediaContent = _attribute(item, 'media:content', 'url');
       final mediaThumbnail = _attribute(item, 'media:thumbnail', 'url');
-      final candidate = enclosure ?? mediaContent ?? mediaThumbnail;
-      final imageUrl = candidate != null &&
-              !candidate.toLowerCase().contains('.mp4') &&
-              !candidate.toLowerCase().contains('video')
-          ? candidate
-          : null;
+      final mediaCandidates = [enclosure, mediaContent, mediaThumbnail].whereType<String>();
+      final imageCandidate = mediaCandidates.firstWhere(
+        (candidate) =>
+            !candidate.toLowerCase().contains('.mp4') &&
+            !candidate.toLowerCase().contains('video'),
+        orElse: () => '',
+      );
+      final imageUrl = imageCandidate.isEmpty ? null : imageCandidate;
       final permalink = link.startsWith('http')
           ? link
           : (guid.startsWith('http') ? guid : 'https://x.com/${source.handle}');
