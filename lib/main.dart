@@ -15,6 +15,7 @@ import 'screens/post_detail_page.dart';
 import 'screens/profile_page.dart';
 import 'screens/settings_page.dart';
 import 'services/bot_engine.dart';
+import 'services/external_x_service.dart';
 import 'services/illit_service.dart';
 import 'services/updater_service.dart';
 import 'widgets/avatar_widget.dart';
@@ -243,6 +244,7 @@ class _MainShellState extends State<MainShell> with SingleTickerProviderStateMix
   final Map<String, List<DmMessage>> dmThreads = {};
 
   bool refreshingIllit = false;
+  bool refreshingExternal = false;
   bool _hideUpdateBanner = false;
   ReleaseInfo? updateAvailable;
   Timer? _illitTimer;
@@ -265,10 +267,12 @@ class _MainShellState extends State<MainShell> with SingleTickerProviderStateMix
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;
       _refreshIllit(silent: true);
+      _refreshExternalSources(silent: true);
     });
     _illitTimer = Timer.periodic(const Duration(minutes: 25), (_) {
       if (!mounted) return;
       _refreshIllit(silent: true);
+      _refreshExternalSources(silent: true);
     });
   }
 
@@ -307,6 +311,11 @@ class _MainShellState extends State<MainShell> with SingleTickerProviderStateMix
     }
     if (!accounts.any((a) => a.isIllit)) {
       accounts.add(BotEngine.defaultAccounts()[1]);
+    }
+    for (final source in ExternalXService.sources) {
+      if (!accounts.any((account) => account.id == source.id)) {
+        accounts.add(source.toAccount());
+      }
     }
 
     final rawPosts = widget.prefs.getString('posts_v3');
@@ -464,6 +473,51 @@ class _MainShellState extends State<MainShell> with SingleTickerProviderStateMix
       if (!silent && mounted) _toast('Não consegui buscar as novidades do ILLIT agora.');
     } finally {
       if (mounted) setState(() => refreshingIllit = false);
+    }
+  }
+
+  Future<void> _refreshExternalSources({bool silent = false}) async {
+    if (refreshingExternal) return;
+    refreshingExternal = true;
+    try {
+      final fetched = await ExternalXService.fetchAll();
+      if (!mounted) return;
+      final existing = posts.map((post) => post.id).toSet();
+      final fresh = fetched.where((post) => !existing.contains(post.id)).toList();
+      if (fresh.isNotEmpty) {
+        setState(() {
+          posts.insertAll(0, fresh);
+          _sortTimeline();
+          for (final source in ExternalXService.sources) {
+            final sourcePosts = fresh.where((post) => post.accountId == source.id).toList();
+            if (sourcePosts.isEmpty) continue;
+            final latest = sourcePosts.first;
+            notifications.insert(
+              0,
+              AppNotification(
+                id: 'notif-${source.id}-${DateTime.now().microsecondsSinceEpoch}',
+                type: 'update',
+                fromName: source.name,
+                fromHandle: '@${source.handle}',
+                fromAvatarEmoji: source.avatarEmoji,
+                postId: latest.id,
+                preview: latest.text,
+                createdAtMs: DateTime.now().millisecondsSinceEpoch,
+              ),
+            );
+          }
+        });
+        _saveAll();
+      }
+      if (!silent && mounted) {
+        _toast(fresh.isEmpty
+            ? 'As contas acompanhadas já estão em dia ♡'
+            : '${fresh.length} publicação(ões) nova(s) adicionada(s) ♡');
+      }
+    } catch (_) {
+      if (!silent && mounted) _toast('Não consegui atualizar as contas do X agora.');
+    } finally {
+      refreshingExternal = false;
     }
   }
 
